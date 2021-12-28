@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: "viya4minaks-7d01"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "viya4minaks-7d01"
+  template:
+    metadata:
+      labels:
+        app: "viya4minaks-7d01"
+    spec:
+      containers:
+        - name: "viya4minaks-7d01"
+          image: "personalregistrysas.azurecr.io/viya4minaks"
+          ports:
+          - containerPort: 80
