@@ -1,0 +1,83 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sas-hello
+  labels:
+    app: sas-hello
+    app.kubernetes.io/part-of: sas-hello
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sas-hello
+  template:
+    metadata:
+      labels:
+        app: sas-hello
+        app.kubernetes.io/part-of: sas-hello
+    spec:
+      containers:
+        - name: sas-hello
+          image: fsmunoz/sashello:3.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: sas-hello
+          resources:
+            limits:
+              cpu: 500m
+              memory: 500Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-service
+  labels:
+    app: hello-service
+    app.kubernetes.io/part-of: sas-hello
+spec:
+  ports:
+    - name: hello-port
+      port: 3000
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: sas-hello
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+spec:
+  rules:
+    - host: <FQDN>
+      http:
+        paths:
+          - backend:
+              serviceName: hello-service
+              servicePort: 3000
+            path: /sashello
+            pathType: Prefix
+    - host: <"*.FQDN">
+      http:
+        paths:
+          - backend:
+              serviceName: hello-service
+              servicePort: 3000
+            path: /sashello
+            pathType: Prefix
+  tls:
+  - hosts:
+    - <FQDN>
+    secretName: sas-ingress-certificate
